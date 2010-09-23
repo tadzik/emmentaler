@@ -1,0 +1,1 @@
+1 0 * * * smoker.pl | perl sergenerator.pl > $(echo ~/emmentaler/views/`date +"%d-%m-%y"`.tt)

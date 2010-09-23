@@ -1,0 +1,7 @@
+What's in here:
+emmentaler/ -- a Dancer app showing the test results
+sergenerator.pl -- a Perl 5 script turning smoker.pl output into html templates for the Dancer app
+cronjob -- a plaintext file with a cronjob performing tests
+
+Dependencies:
+neutro
