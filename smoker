@@ -8,7 +8,7 @@ multi gen-result($) {
 }
 
 multi gen-result(X::Panda $ex) {
-    return do given $ex.stage {
+    my %res = do given $ex.stage {
         when 'resolve' | 'fetch' {
             { prereq => False }
         }
@@ -18,7 +18,9 @@ multi gen-result(X::Panda $ex) {
         when 'test' {
             { prereq => True, build => True, test => False }
         }
-    }
+    };
+    %res<description> = $ex.description;
+    return %res
 }
 
 sub MAIN ($projectsfile) {
