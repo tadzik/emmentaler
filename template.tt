@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <title>Emmentaler</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <style type="text/css">
+        .implemented, .implemented a {
+            background-color: #3c3;
+            color:            white;
+        }
+        .partial    , .partial a     {
+            background-color: #fb4;
+            color:            #333;
+        }
+        .missing    , .missing a     {
+            background-color: #f55;
+            color:            white;
+        }
+        .unknown    , .unknown a      {
+            background-color: #ccc;
+            color:            white;
+        }
+        .implemented, .partial, .missing, .unknown {
+            text-align:         center;
+            width:              150px;
+            font-weight:        bold;
+            font-family:        monospace;
+            font-size:          18px;
+            -moz-border-radius: 15px;
+            border-radius:      15px;
+        }
+        .subsection {
+            padding-top: 1em;
+            text-align: left;
+        }
+        .minor {
+            font-size:  smaller;
+            font-style: italic;
+        }
+        .footnote_link { 
+            font-size: 70%;
+            position:  absolute; 
+        }
+        :target {
+            background-color: #FFFF66;
+        }
+    </style>
+
+</head>
+<body>
+    <img src="http://perl6.org/camelia-logo-small.png" alt="Camelia, the Perl 6 bug" align="right">
+
+    <h1>Emmentaler</h1>
+
+<h2>Modules (on Rakudo)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Module</th>
+                <th>Prereqs ok</th>
+                <th>Builds</th>
+                <th>Tests</th>
+                <th>Additional information</th>
+            </tr>
+        </thead>
+        <tbody>
+
+% my $results = shift;
+% my $stats = delete $results->{_statistics};
+% for my $module (sort { lc $a cmp lc $b } keys $results) {
+    <tr><td style="border-bottom:1px dotted #98CAEB">
+            <a href="#"><%= $module %></a>
+        </td>
+%     my %res = %{$results->{$module}};
+%     for my $stage (qw(prereq build test)) {
+%         if (defined $res{$stage}) {
+%             if ($res{$stage} == 1) {
+        <td><div class="implemented">+</div></td>
+%             } else {
+        <td><div class="missing">-</div></td>
+%             }
+%         } else {
+        <td><div class="unknown">?</div></td>
+%         }
+%     }
+   <td><%= $res{description} // '' %></td>
+    </tr>
+% }
+
+         </tbody>
+    </table>
+
+% my $minutes = int($stats->{runtime} / 60);
+% my $seconds = $stats->{runtime} % 60;
+
+<p>Results from <%= $stats->{datetime} %>
+on <%= $stats->{compiler} %> <%= $stats->{version} %></p>
+<p>Testing took <%= $minutes %> minutes and <%= $seconds %> seconds</p>
+
+</body>
+</html>
