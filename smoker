@@ -33,6 +33,8 @@ sub MAIN ($projectsfile) {
 
     my %log;
 
+    my $start = time;
+
     for $panda.ecosystem.project-list -> $p {
         my $x = $panda.ecosystem.get-project($p);
         # don't waste time if it has already been installed once
@@ -44,6 +46,15 @@ sub MAIN ($projectsfile) {
         %log{$p} = gen-result($! // 'chocolate cake');
     }
 
+    my $end = time;
+
+    %log<_statistics> = {
+        runtime  => $end - $start,
+        compiler => $*PERL<compiler><name>,
+        version  => $*PERL<compiler><ver>,
+        datetime => DateTime.new(now).Str
+    }
+
     shell 'rm -rf masstest/';
     shell 'rm -rf installlib/';
 
@@ -51,4 +62,8 @@ sub MAIN ($projectsfile) {
         .say: to-json %log;
         .close;
     }
+
+    say '';
+    say 'Smoke test results have been written to results.json';
+    say '====================================================';
 }
