@@ -1,0 +1,54 @@
+#!/usr/bin/env perl6
+use Panda;
+use Shell::Command;
+use JSON::Tiny;
+
+multi gen-result($) {
+    { prereq => True, build => True, test => True }
+}
+
+multi gen-result(X::Panda $ex) {
+    return do given $ex.stage {
+        when 'resolve' | 'fetch' {
+            { prereq => False }
+        }
+        when 'build' {
+            { prereq => True, build => False }
+        }
+        when 'test' {
+            { prereq => True, build => True, test => False }
+        }
+    }
+}
+
+sub MAIN ($projectsfile) {
+    try mkdir "installlib";
+    %*ENV<PERL6LIB> = "{cwd}/installlib/lib:" ~ %*ENV<PERL6LIB>;
+    my $panda = Panda.new(
+        srcdir       => "{cwd}/masstest/pandadir/src",
+        destdir      => "{cwd}/installlib",
+        statefile    => "{cwd}/masstest/pandadir/state",
+        projectsfile => $projectsfile,
+    );
+
+    my %log;
+
+    for $panda.ecosystem.project-list -> $p {
+        my $x = $panda.ecosystem.get-project($p);
+        # don't waste time if it has already been installed once
+        if $panda.ecosystem.project-get-state($x) ne 'absent' {
+            %log{$p} = gen-result(Any);
+            next;
+        }
+        try $panda.resolve($p);
+        %log{$p} = gen-result($! // 'chocolate cake');
+    }
+
+    shell 'rm -rf masstest/';
+    shell 'rm -rf installlib/';
+
+    given open('results.json', :w) {
+        .say: to-json %log;
+        .close;
+    }
+}
