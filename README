@@ -4,6 +4,8 @@
 
 panda
 
+Perl 5 and Mojolicious (for formatter)
+
 ## Instructions ##
 
  * Get a projects.json with modules you want to test,
