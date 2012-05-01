@@ -1,10 +1,12 @@
 #!/usr/bin/env perl
-use 5.014;
 use Mojo::JSON;
 use Mojo::Template;
-use File::Slurp 'slurp';
 
 my $mt = Mojo::Template->new;
 
-my $results = Mojo::JSON->new->decode(slurp 'results.json');
-print $mt->render_file_to_file('template.tt', 'index.html', $results);
+open my $fh, '<', 'results.json' or die "No results.json available";
+my $json  = do { local $/; <$fh> };
+close $fh;
+
+my $results = Mojo::JSON->new->decode($json);
+$mt->render_file_to_file('template.tt', 'index.html', $results);
