@@ -1,7 +1,12 @@
-What's in here:
-emmentaler/ -- a Dancer app showing the test results
-sergenerator.pl -- a Perl 5 script turning smoker.pl output into html templates for the Dancer app
-cronjob -- a plaintext file with a cronjob performing tests
+# Emmentaler -- Perl 6 modules smoketested #
 
-Dependencies:
-neutro
+## Dependencies ##
+
+panda
+
+## Instructions ##
+
+ * Get a projects.json with modules you want to test,
+   for example http://feather.perl6.nl:3000/projects.json
+ * Run smoker
+ * Run formatter if you want an HTML summary
