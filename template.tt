@@ -55,11 +55,11 @@
     <h1>Emmentaler</h1>
 
 <h2>Legend</h2>
-<table>
-<tr><td>Implemented:</td><td><div class="implemented">+</div></td></tr>
-<tr><td>Missing:</td><td><div class="missing">-</div></td></tr>
-<tr><td>Unknown:</td><td><div class="unknown">?</div></td></tr>
-</table>
+<dl>
+<dt><div class="implemented">+</div></dt><dd>☺</dd>
+<dt><div class="missing">-</div></dt><dd>☹</dd>
+<dt><div class="unknown">?</div></dt><dd>Unknown</dd>
+</dl>
 
 <h2>Modules (on Rakudo)</h2>
 
