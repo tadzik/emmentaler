@@ -25,7 +25,7 @@ multi gen-result(X::Panda $ex) {
 
 sub MAIN ($projectsfile) {
     try mkdir "installlib";
-    %*ENV<PERL6LIB> = "{cwd}/installlib/lib:" ~ %*ENV<PERL6LIB>;
+    %*ENV<PERL6LIB> = "{cwd}/installlib/lib:" ~ (%*ENV<PERL6LIB> // '');
     my $panda = Panda.new(
         srcdir       => "{cwd}/masstest/pandadir/src",
         destdir      => "{cwd}/installlib",
