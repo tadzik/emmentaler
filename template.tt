@@ -110,6 +110,7 @@
 on <%= $stats->{compiler} %> <%= $stats->{version} %></p>
 <p>Testing took <%= $minutes %> minutes and <%= $seconds %> seconds</p>
 <p><%= $ok %> modules ok, <%= $fail %> not ok (<%= $total %> total)</p>
+<p>Generated using <a href="https://github.com/tadzik/emmentaler">emmentaler</a></p>
 
 </body>
 </html>
