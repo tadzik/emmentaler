@@ -9,4 +9,20 @@ my $json  = do { local $/; <$fh> };
 close $fh;
 
 my $results = Mojo::JSON->new->decode($json);
-$mt->render_file_to_file('template.tt', 'index.html', $results);
+
+sub sortsub {
+    ($a, $b);
+
+    if ($results->{$a}{'test'} == $results->{$b}{'test'}) {
+        return lc $a cmp lc $b;
+    }
+
+    if ($results->{$a}{'test'} == 0) {
+        return 1
+    }
+
+    return -1
+}
+
+my @list    = sort { sortsub @_ } grep { !/^_/ } keys %$results;
+$mt->render_file_to_file('template.tt', 'index.html', $results, \@list);

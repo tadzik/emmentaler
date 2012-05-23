@@ -75,10 +75,10 @@
         </thead>
         <tbody>
 
-% my $results = shift;
+% my ($results, $list) = @_;
 % my ($ok, $fail, $total);
 % my $stats = delete $results->{_statistics};
-% for my $module (sort { lc $a cmp lc $b } keys $results) {
+% for my $module (@$list) {
     <tr><td style="border-bottom:1px dotted #98CAEB">
             <a href="#"><%= $module %></a>
         </td>
