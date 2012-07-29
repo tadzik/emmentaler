@@ -25,4 +25,8 @@ sub sortsub {
 }
 
 my @list    = sort { sortsub @_ } grep { !/^_/ } keys %$results;
-$mt->render_file_to_file('template.tt', 'index.html', $results, \@list);
+my $res     = $mt->render_file('template.tt', $results, \@list);
+open my $f, '>:encoding(UTF-8)', 'index.html'
+    or die "Cannot open index.html for writing: $!";
+print { $f } $res;
+close $f or die "Error while writing index.html: $!";
