@@ -1,0 +1,60 @@
+#!/usr/bin/env perl6
+use v6;
+use JSON::Tiny;
+use Term::ANSIColor;
+
+sub MAIN($old-results, $new-results) {
+    my %old = from-json slurp $old-results;
+    my %new = from-json slurp $new-results;
+    %old.delete('_statistics');
+    %new.delete('_statistics');
+
+    sub improved($m, $stage) {
+        my $was = %old{$m}{$stage} // False;
+        my $is  = %new{$m}{$stage} // False;
+
+        if !$was and $is {
+            return True;
+        }
+        return False;
+    }
+
+    sub regressed($m, $stage) {
+        my $was = %old{$m}{$stage} // False;
+        my $is  = %new{$m}{$stage} // False;
+
+        if $was and !$is {
+            return True;
+        }
+        return False;
+    }
+
+    sub good($x) {
+        colored($x, 'bold green')
+    }
+    sub bad($x) {
+        colored($x, 'bold red')
+    }
+
+    for %new.keys.sort -> $m {
+        if not defined %old{$m} {
+            say colored "New project: $m", 'bold yellow'
+        }
+    }
+
+    for %old.keys.sort -> $m {
+        if improved($m, 'build') {
+            say good("$m now builds correctly")
+        } elsif regressed($m, 'build') {
+            say bad("$m doesn't build anymore");
+            next;
+        }
+        
+        if improved($m, 'test') {
+            say good("$m now passes its tests")
+        }
+        if regressed($m, 'test') {
+            say bad("$m now fails its tests")
+        }
+    }
+}
