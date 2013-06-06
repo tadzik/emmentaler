@@ -3,24 +3,31 @@ use Panda;
 use Shell::Command;
 use JSON::Tiny;
 
-multi gen-result($) {
+sub gen-result-success() {
     { prereq => True, build => True, test => True }
 }
 
-multi gen-result(X::Panda $ex) {
-    my %res = do given $ex.stage {
-        when 'resolve' | 'fetch' {
-            { prereq => False }
-        }
-        when 'build' {
-            { prereq => True, build => False }
-        }
-        when 'test' {
-            { prereq => True, build => True, test => False }
-        }
-    };
-    %res<description> = $ex.description;
-    return %res
+sub gen-result-failure($ex) {
+    my %res;
+
+    if $ex ~~ X::Panda {
+        %res = do given $ex.stage {
+            when 'resolve' | 'fetch' {
+                { prereq => False }
+            }
+            when 'build' {
+                { prereq => True, build => False }
+            }
+            when 'test' {
+                { prereq => True, build => True, test => False }
+            }
+        };
+        %res<description> = $ex.description;
+    } else {
+        %res = { prereq => False, build => False, test => False };
+    }
+
+    %res
 }
 
 sub MAIN ($projectsfile) {
@@ -43,11 +50,11 @@ sub MAIN ($projectsfile) {
         my $x = $panda.ecosystem.get-project($p);
         # don't waste time if it has already been installed once
         if $panda.ecosystem.project-get-state($x) ne 'absent' {
-            %log{$p} = gen-result(Any);
+            %log{$p} = gen-result-success;
             next;
         }
         try $panda.resolve($p);
-        %log{$p} = gen-result($! // 'chocolate cake');
+        %log{$p} = $! ?? gen-result-failure($!) !! gen-result-success;
     }
 
     my $end = time;
