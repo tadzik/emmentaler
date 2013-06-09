@@ -8,35 +8,31 @@ sub gen-result-success() {
 }
 
 sub gen-result-failure($ex) {
-    my %res;
-
-    if $ex ~~ X::Panda {
-        %res = do given $ex.stage {
-            when 'resolve' | 'fetch' {
-                { prereq => False }
-            }
-            when 'build' {
-                { prereq => True, build => False }
-            }
-            when 'test' {
-                { prereq => True, build => True, test => False }
-            }
-        };
-        %res<description> = $ex.description;
-    } else {
-        %res = { prereq => False, build => False, test => False };
-    }
-
+    my %res = do given $ex.stage {
+        when 'resolve' | 'fetch' {
+            { prereq => False }
+        }
+        when 'build' {
+            { prereq => True, build => False }
+        }
+        when 'test' {
+            { prereq => True, build => True, test => False }
+        }
+    };
+    %res<description> = $ex.description;
     %res
 }
 
 sub MAIN ($projectsfile) {
     try mkdir "installlib";
     %*ENV<PERL6LIB> = "{cwd}/installlib/lib:" ~ (%*ENV<PERL6LIB> // '');
+    try unlink "{cwd}/state";
     my $e = Panda::Ecosystem.new(
         statefile    => "{cwd}/state",
         projectsfile => $projectsfile,
-    );
+    ) but role {
+        method flush-states { }
+    };
     my $panda = Panda.new(
         ecosystem => $e,
         installer => Panda::Installer.new(destdir => "{cwd}/installlib")
