@@ -8,7 +8,7 @@ sub gen-result-success() {
 }
 
 sub gen-result-failure($ex) {
-    my %res = do given $ex.stage {
+    my %res = do given $ex.?stage {
         when 'resolve' | 'fetch' {
             { prereq => False }
         }
@@ -18,8 +18,12 @@ sub gen-result-failure($ex) {
         when 'test' {
             { prereq => True, build => True, test => False }
         }
+	default {
+	    say $ex.perl;
+            { prereq => False }
+	}
     };
-    %res<description> = $ex.description;
+    %res<description> = $ex.?description // $ex.perl;
     %res
 }
 
@@ -58,7 +62,7 @@ sub MAIN ($projectsfile) {
     %log<_statistics> = {
         runtime  => $end - $start,
         compiler => $*PERL<compiler><name>,
-        version  => $*PERL<compiler><ver>,
+        version  => $*PERL<compiler><ver>.Str,
         datetime => DateTime.new(now).Str
     }
 
