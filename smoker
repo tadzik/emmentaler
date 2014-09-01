@@ -29,6 +29,7 @@ sub gen-result-failure($ex) {
 
 sub MAIN ($projectsfile) {
     try mkdir "installlib";
+    @*INC.push("{cwd}/installlib/lib");
     %*ENV<PERL6LIB> = "{cwd}/installlib/lib:" ~ (%*ENV<PERL6LIB> // '');
     try unlink "{cwd}/state";
     my $e = Panda::Ecosystem.new(
