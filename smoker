@@ -29,18 +29,18 @@ sub gen-result-failure($ex) {
 
 sub MAIN ($projectsfile) {
     try mkdir "installlib";
-    @*INC.push("{cwd}/installlib/lib");
-    %*ENV<PERL6LIB> = "{cwd}/installlib/lib:" ~ (%*ENV<PERL6LIB> // '');
-    try unlink "{cwd}/state";
+    @*INC.push("{$*CWD}/installlib/lib");
+    %*ENV<PERL6LIB> = "{$*CWD}/installlib/lib:" ~ (%*ENV<PERL6LIB> // '');
+    try unlink "{$*CWD}/state";
     my $e = Panda::Ecosystem.new(
-        statefile    => "{cwd}/state",
+        statefile    => "{$*CWD}/state",
         projectsfile => $projectsfile,
     ) but role {
         method flush-states { }
     };
     my $panda = Panda.new(
         ecosystem => $e,
-        installer => Panda::Installer.new(destdir => "{cwd}/installlib")
+        installer => Panda::Installer.new(destdir => "{$*CWD}/installlib")
     );
 
     my %log;
@@ -62,8 +62,8 @@ sub MAIN ($projectsfile) {
 
     %log<_statistics> = {
         runtime  => $end - $start,
-        compiler => $*PERL<compiler><name>,
-        version  => $*PERL<compiler><ver>.Str,
+        compiler => $*PERL.compiler.name,
+        version  => $*PERL.compiler.version.Str,
         datetime => DateTime.new(now).Str
     }
 
