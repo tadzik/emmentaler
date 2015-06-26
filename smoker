@@ -3,8 +3,8 @@ use Panda;
 use Shell::Command;
 use JSON::Tiny;
 
-sub gen-result-success() {
-    { prereq => True, build => True, test => True }
+sub gen-result-success($project) {
+    { prereq => True, build => True, test => True, warnings => (($project.build-stderr // '') ~~ / \S /).Bool }
 }
 
 sub gen-result-failure($ex) {
@@ -51,11 +51,11 @@ sub MAIN ($projectsfile) {
         my $x = $panda.ecosystem.get-project($p);
         # don't waste time if it has already been installed once
         if $panda.ecosystem.project-get-state($x) ne 'absent' {
-            %log{$p} = gen-result-success;
+            %log{$p} = gen-result-success($p);
             next;
         }
         try $panda.resolve($p);
-        %log{$p} = $! ?? gen-result-failure($!) !! gen-result-success;
+        %log{$p} = $! ?? gen-result-failure($!) !! gen-result-success($p);
     }
 
     my $end = time;
