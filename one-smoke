@@ -4,7 +4,17 @@ use Shell::Command;
 use File::Temp;
 
 sub gen-result-success($project) {
-    { prereq => True, build => True, test => True, warnings => (($project.build-stderr // '') ~~ / \S /).Bool }
+    { 
+        prereq => True,
+        build => True,
+        test => True,
+        warnings => (($project.build-stderr // '') ~~ / \S /).Bool,
+        _statistics => {
+            compiler => $*PERL.compiler.name,
+            version  => $*PERL.compiler.version.Str,
+            datetime => DateTime.new(now).Str
+        }
+    }
 }
 
 sub gen-result-failure($ex) {
@@ -59,13 +69,6 @@ sub MAIN ($projectsfile, $project) {
     }
 
     my $end = time;
-
-    %log<_statistics> = {
-        runtime  => $end - $start,
-        compiler => $*PERL.compiler.name,
-        version  => $*PERL.compiler.version.Str,
-        datetime => DateTime.new(now).Str
-    }
 
     shell 'rm -rf installlib/';
 
