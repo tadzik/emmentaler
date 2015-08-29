@@ -1,0 +1,26 @@
+#!/usr/bin/env perl6
+use Panda;
+use Shell::Command;
+
+my $smoke-skip = "smoke-skip";
+# my $smoke-skip = "/home/colomon/smoke-skip";
+
+sub MAIN ($projectsfile, ) {
+    try mkdir "installlib";
+    @*INC.push("{$*CWD}/installlib/lib");
+    %*ENV<PERL6LIB> = "{$*CWD}/installlib/lib:" ~ (%*ENV<PERL6LIB> // '');
+    try unlink "{$*CWD}/state";
+    my $e = Panda::Ecosystem.new(
+        statefile    => "{$*CWD}/state",
+        projectsfile => $projectsfile,
+    ) but role {
+        method flush-states { }
+    };
+    my $panda = Panda.new(
+        ecosystem => $e,
+        installer => Panda::Installer.new(destdir => "{$*CWD}/installlib")
+    );
+
+    my $skips := $smoke-skip.IO.slurp.lines.Set;
+    $panda.ecosystem.project-list.map({ "./one-smoke projects.json " ~ $_ }).grep(* ∉ $skips).pick(*).join("\n").say;
+}
