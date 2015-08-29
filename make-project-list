@@ -22,5 +22,5 @@ sub MAIN ($projectsfile, ) {
     );
 
     my $skips := $smoke-skip.IO.slurp.lines.Set;
-    $panda.ecosystem.project-list.map({ "./one-smoke projects.json " ~ $_ }).grep(* ∉ $skips).pick(*).join("\n").say;
+    $panda.ecosystem.project-list.map(*.Str).grep(* ∉ $skips).map({ "./one-smoke projects.json " ~ $_ }).pick(*).join("\n").say;
 }
