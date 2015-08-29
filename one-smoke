@@ -1,0 +1,81 @@
+#!/usr/bin/env perl6
+use Panda;
+use Shell::Command;
+use File::Temp;
+
+sub gen-result-success($project) {
+    { prereq => True, build => True, test => True, warnings => (($project.build-stderr // '') ~~ / \S /).Bool }
+}
+
+sub gen-result-failure($ex) {
+    my %res = do given $ex.?stage {
+        when 'resolve' | 'fetch' {
+            { prereq => False }
+        }
+        when 'build' {
+            { prereq => True, build => False }
+        }
+        when 'test' {
+            { prereq => True, build => True, test => False }
+        }
+	default {
+	    say $ex.perl;
+            { prereq => False }
+	}
+    };
+    %res<description> = $ex.?description // $ex.perl;
+    %res
+}
+
+sub MAIN ($projectsfile, $project) {
+    my $dir = tempdir(:prefix("one-"));
+    @*INC.push("$dir/lib");
+    %*ENV<PERL6LIB> = "$dir/lib:" ~ (%*ENV<PERL6LIB> // '');
+    try unlink "$dir/state";
+    my $e = Panda::Ecosystem.new(
+        statefile    => "$dir/state",
+        projectsfile => $projectsfile,
+    ) but role {
+        method flush-states { }
+    };
+    my $panda = Panda.new(
+        ecosystem => $e,
+        installer => Panda::Installer.new(destdir => "$dir/installlib")
+    );
+
+    my %log;
+
+    my $start = time;
+
+    with $project -> $p {
+        my $x = $panda.ecosystem.get-project($p);
+        # don't waste time if it has already been installed once
+        if $panda.ecosystem.project-get-state($x) ne 'absent' {
+            %log{$p} = gen-result-success($x);
+            next;
+        }
+        try $panda.resolve($x);
+        %log{$p} = $! ?? gen-result-failure($!) !! gen-result-success($x);
+    }
+
+    my $end = time;
+
+    %log<_statistics> = {
+        runtime  => $end - $start,
+        compiler => $*PERL.compiler.name,
+        version  => $*PERL.compiler.version.Str,
+        datetime => DateTime.new(now).Str
+    }
+
+    shell 'rm -rf installlib/';
+
+    my $results = "results-" ~ $project.subst('::', '--', :g) ~ ".json";
+    given open($results, :w) {
+        .say: to-json %log;
+        .close;
+    }
+
+    say '';
+    say "Smoke test results have been written to $results";
+    say '====================================================';
+}
