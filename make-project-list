@@ -7,7 +7,7 @@ my $smoke-skip = "smoke-skip";
 
 sub MAIN ($projectsfile, ) {
     try mkdir "installlib";
-    @*INC.push("{$*CWD}/installlib/lib");
+    use lib "{$*CWD}/installlib/lib";
     %*ENV<PERL6LIB> = "{$*CWD}/installlib/lib:" ~ (%*ENV<PERL6LIB> // '');
     try unlink "{$*CWD}/state";
     my $e = Panda::Ecosystem.new(
@@ -22,5 +22,5 @@ sub MAIN ($projectsfile, ) {
     );
 
     my $skips := $smoke-skip.IO.slurp.lines.Set;
-    $panda.ecosystem.project-list.map(*.Str).grep(* ∉ $skips).map({ "./one-smoke projects.json " ~ $_ }).pick(*).join("\n").say;
+    $panda.ecosystem.project-list.map(*.Str).grep(* ∉ $skips).map({ "timeout 10m ./one-smoke projects.json " ~ $_ }).pick(*).join("\n").say;
 }
