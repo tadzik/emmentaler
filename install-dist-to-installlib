@@ -1,0 +1,49 @@
+use JSON::Tiny;
+use Panda;
+
+sub gen-result-success($project) {
+    { prereq => True, build => True, test => True, warnings => (($project.build-stderr // '') ~~ / \S /).Bool }
+}
+
+sub gen-result-failure($ex) {
+    my %res = do given $ex.?stage {
+        when 'resolve' | 'fetch' {
+            { prereq => False }
+        }
+        when 'build' {
+            { prereq => True, build => False }
+        }
+        when 'test' {
+            { prereq => True, build => True, test => False }
+        }
+       default {
+           say $ex.perl;
+            { prereq => False }
+       }
+    };
+    %res<description> = $ex.?description // $ex.perl;
+    %res
+}
+
+sub MAIN($projectsfile, $p) {
+    my $e = Panda::Ecosystem.new(
+        statefile    => "{$*CWD}/state".IO,
+        projectsfile => $projectsfile,
+    );
+    my $panda = Panda.new(
+        ecosystem => $e,
+        installer => Panda::Installer.new(prefix => "{$*CWD}/installlib")
+    );
+
+    my $output = 'install-dist.out'.IO.open(:w);
+    my $x = $panda.ecosystem.get-project($p);
+    # don't waste time if it has already been installed once
+    if $panda.ecosystem.project-get-state($x) ne 'absent' {
+        $output.print: to-json(gen-result-success($x));
+        next;
+    }
+    try $panda.resolve($p);
+    $output.print: to-json($! ?? gen-result-failure($!) !! gen-result-success($x));
+}
+
+# vim: ft=perl6
