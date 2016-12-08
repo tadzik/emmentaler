@@ -30,7 +30,10 @@ sub MAIN ($projectsfile) {
         my $proc = run('perl6', 'install-dist-to-installlib', $projectsfile, $p.Str);
         my $output = slurp('install-dist.out');
         unlink('install-dist.out');
-        %log{$p} = from-json($output);
+        {
+            %log{$p} = from-json($output);
+            CATCH { default { note $_ } }
+        }
     }
 
     my $end = time;
