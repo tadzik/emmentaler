@@ -1,6 +1,7 @@
 #!/usr/bin/env perl6
 use Panda;
 use Shell::Command;
+use JSON::Tiny;
 
 sub gen-result-success($project) {
     { prereq => True, build => True, test => True, warnings => (($project.build-stderr // '') ~~ / \S /).Bool }
