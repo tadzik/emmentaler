@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-use Mojo::JSON;
+use Mojo::JSON qw(decode_json);
 use Mojo::Template;
 
 my $mt = Mojo::Template->new;
@@ -8,7 +8,7 @@ open my $fh, '<', 'results.json' or die "No results.json available";
 my $json  = do { local $/; <$fh> };
 close $fh;
 
-my $results = Mojo::JSON->new->decode($json);
+my $results = decode_json($json);
 
 sub sortsub {
     ($a, $b);
