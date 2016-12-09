@@ -6,8 +6,8 @@ use Term::ANSIColor;
 sub MAIN($old-results, $new-results) {
     my %old = from-json slurp $old-results;
     my %new = from-json slurp $new-results;
-    %old.delete('_statistics');
-    %new.delete('_statistics');
+    %old<_statistics>:delete;
+    %new<_statistics>:delete;
 
     sub improved($m, $stage) {
         my $was = %old{$m}{$stage} // False;
